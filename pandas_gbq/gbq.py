@@ -984,8 +984,10 @@ def to_gbq(dataframe, destination_table, project_id, chunksize=10000,
                                     "data types in the DataFrame match the "
                                     "schema of the destination table.")
     else:
+        if table.partition_decorator in table_id:
+            raise TableCreationError("Cannot create a partition without the main table.")
         table.create(table_id, table_schema)
-
+        
     connector.load_data(dataframe, dataset_id, table_id, chunksize)
 
 
@@ -1027,6 +1029,8 @@ def _generate_bq_schema(df, default_type='STRING'):
 
 
 class _Table(GbqConnector):
+
+    partition_decorator = '$'
 
     def __init__(self, project_id, dataset_id, reauth=False, verbose=False,
                  private_key=None):
