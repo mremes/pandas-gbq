@@ -976,21 +976,28 @@ def to_gbq(dataframe, destination_table, project_id, chunksize=10000,
                                      "already exists. "
                                      "Change the if_exists parameter to "
                                      "append or replace data.")
-        elif if_exists == 'replace':
-            connector.delete_and_recreate_table(
-                dataset_id, table_id, table_schema)
-        elif if_exists == 'append':
+        else:
+            delay = 0
             if not connector.schema_is_subset(dataset_id,
                                               table_id,
                                               table_schema):
-                raise InvalidSchema("Please verify that the structure and "
-                                    "data types in the DataFrame match the "
-                                    "schema of the destination table.")
+                if if_exists == 'append' or table.partition_decorator in table_id:
+                    raise InvalidSchema("Please verify that the structure and "
+                                        "data types in the DataFrame match the "
+                                        "schema of the destination table.")
+                elif if_exists == 'replace':
+                    table._print('The existing table has a different schema. Please '
+                                 'wait 2 minutes. See Google BigQuery issue #191')
+                    delay = 120
+            if if_exists == 'replace':
+                table.delete(table_id)
+                if table.partition_decorator not in table_id:
+                    table.create(table_id, table_schema)
+                    sleep(delay)
     else:
         if table.partition_decorator in table_id:
             raise TableCreationError("Cannot create a partition without the main table.")
         table.create(table_id, table_schema)
-        
     connector.load_data(dataframe, dataset_id, table_id, chunksize)
 
 
