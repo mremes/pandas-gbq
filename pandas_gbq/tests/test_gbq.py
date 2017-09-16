@@ -22,7 +22,6 @@ from pandas.compat.numpy import np_datetime64_compat
 TABLE_ID = 'new_test'
 DPT_TABLE_ID = 'dpt_test'
 
-
 def _skip_if_no_project_id():
     if not _get_project_id():
         pytest.skip(

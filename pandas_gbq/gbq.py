@@ -1057,7 +1057,9 @@ def to_gbq(dataframe, destination_table, project_id, chunksize=10000,
                                      "Change the if_exists parameter to "
                                      "append or replace data.")
         else:
-            delay = 0
+            # must wait 2 minutes before streaming into recreated table
+            # see SO thread: http://bit.ly/2wjixAi
+            delay = 120
             if not connector.schema_is_subset(dataset_id,
                                               table_id,
                                               table_schema):
