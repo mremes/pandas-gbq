@@ -1054,17 +1054,17 @@ class _Table(GbqConnector):
                 table_id, _ = table_id.split('$')
                 partitioning_type = 'DAY'
             except ValueError:
-                raise TableCreationError('Invalid table name: {}'.format(table_id))
+                raise TableCreationError('Invalid table name: {}'
+                                         .format(table_id))
 
         if self.exists(table_id):
             if not partitioning_type:
                 raise TableCreationError("Table {0} already "
                                          "exists".format(table_id))
             elif not self.schema_is_subset(self.dataset_id, table_id, schema):
-                raise TableCreationError("Different schema of partition to the parent table.")
-            else:
-                return
-
+                raise TableCreationError("Different schema of partition "
+                                         "to the parent table.")
+            return
 
         if not _Dataset(self.project_id,
                         private_key=self.private_key).exists(self.dataset_id):
